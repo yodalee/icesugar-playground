@@ -1,7 +1,7 @@
 TARGET = top
 TOP = top
 
-SRCS = top.v uart.v
+SRCS = top.sv uart_tx.sv
 
 ALL: $(TARGET).bin
 
