@@ -6,8 +6,8 @@ module uart (
   input start_send,
 
   /* output */
-  output tx,
-  output done
+  output logic tx,
+  output logic done
 );
 
 typedef enum logic [1:0] {
@@ -16,53 +16,77 @@ typedef enum logic [1:0] {
   STATE_TXING = 2,
   STATE_DONE  = 3
 } State_t;
-State_t state = STATE_IDLE;
-byte tx_buf;
-byte tx_cnt;
-bit  tx_bit = 1'b1;
-assign tx = tx_bit;
+State_t state = STATE_IDLE, state_next;
+byte tx_buf, tx_buf_next;
+byte tx_cnt, tx_cnt_next;
 
-always_ff @(posedge clk_baud) begin
+/* output logic */
+assign done = state == STATE_DONE;
+always_comb begin
+  case (state)
+    STATE_START: begin
+      tx = 1'b0;
+    end
+    STATE_TXING: begin
+      tx = tx_buf[0];
+    end
+    default: begin
+      tx = 1'b1;
+    end
+  endcase
+end
+
+/* next state */
+always_comb begin
+  case (state)
+    STATE_IDLE: begin
+      if (start_send == 1'b1) begin
+        state_next = STATE_START;
+        tx_buf_next = tx_byte;
+        tx_cnt_next = 8'b0;
+      end
+      else begin
+        state_next = STATE_IDLE;
+        tx_buf_next = 8'b0;
+        tx_cnt_next = 8'b0;
+      end
+    end
+    STATE_START: begin
+      state_next = STATE_TXING;
+      tx_buf_next = tx_buf;
+      tx_cnt_next = 8'b0;
+    end
+    STATE_TXING: begin
+      if (tx_cnt < 8'd8) begin
+        state_next = STATE_TXING;
+        tx_buf_next = tx_buf >> 1;
+        tx_cnt_next = tx_cnt+1;
+      end
+      else begin
+        state_next = STATE_DONE;
+        tx_buf_next = 8'b0;
+        tx_cnt_next = 8'b0;
+      end
+    end
+    default: begin
+      state_next = STATE_IDLE;
+      tx_buf_next = 8'b0;
+      tx_cnt_next = 8'b0;
+    end
+  endcase
+end
+
+/* update state logic */
+always_ff @(posedge clk_baud or negedge rst) begin
   if (!rst) begin
     state <= STATE_IDLE;
-    tx_bit <= 1'b1;
-    done <= 1'b0;
-    tx_cnt <= 0;
+    tx_buf <= 8'b0;
+    tx_cnt <= 8'b0;
   end
   else begin
-    case (state)
-      STATE_IDLE: begin
-        tx_bit <= 1'b1;
-        done <= 1'b0;
-        if (start_send == 1'b1) begin
-          state <= STATE_START;
-          tx_buf <= tx_byte;
-        end
-      end
-      STATE_START: begin
-        state <= STATE_TXING;
-        tx_bit <= 1'b0;
-      end
-      STATE_TXING: begin
-        if (tx_cnt < 8'd8) begin
-          tx_bit <= tx_buf[0];
-          tx_buf <= tx_buf >> 1;
-          tx_cnt <= tx_cnt+1;
-        end
-        else begin
-          state  <= STATE_DONE;
-          tx_bit <= 1'b1;
-          tx_cnt <= 8'd0;
-        end
-      end
-      STATE_DONE: begin
-        done <= 1'b1;
-        state <= STATE_IDLE;
-      end
-      default: begin
-        state <= STATE_IDLE;
-      end
-    endcase
+    state <= state_next;
+    tx_buf <= tx_buf_next;
+    tx_cnt <= tx_cnt_next;
   end
 end
 
