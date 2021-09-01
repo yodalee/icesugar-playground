@@ -10,6 +10,8 @@ module uart (
   output logic done
 );
 
+parameter CLK_PER_BAUD = 1;
+
 typedef enum logic [1:0] {
   STATE_IDLE  = 0,
   STATE_START = 1,
