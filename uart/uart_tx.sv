@@ -1,6 +1,6 @@
 module uart (
   /* input */
-  input clk_baud,
+  input clk,
   input rst,
   input [7:0] tx_byte,
   input start_send,
@@ -11,6 +11,7 @@ module uart (
 );
 
 parameter CLK_PER_BAUD = 1;
+localparam CLK_CNT_LIMIT = CLK_PER_BAUD-1;
 
 typedef enum logic [1:0] {
   STATE_IDLE  = 0,
@@ -39,22 +40,28 @@ always_comb begin
   endcase
 end
 
+/* next logic for clk_cnt */
+always_comb begin
+  clk_cnt_next = (state == STATE_IDLE || clk_cnt == CLK_CNT_LIMIT) ? 0 : clk_cnt+1;
+end
+
 /* next logic for state */
 always_comb begin
   case (state)
     STATE_IDLE: begin
-      if (start_send == 1'b1) begin state_next = STATE_START; end
-      else begin state_next = state; end
+      state_next = (start_send == 1'b1) ? STATE_START : state;
     end
     STATE_START: begin
-      state_next = STATE_TXING;
+      if (clk_cnt < CLK_CNT_LIMIT) begin state_next = state; end
+      else begin state_next = STATE_TXING; end
     end
     STATE_TXING: begin
-      if (tx_cnt < 8'd8) begin state_next = state; end
-      else begin state_next = STATE_DONE; end
+      if (clk_cnt == CLK_CNT_LIMIT && tx_cnt == 7) begin state_next = STATE_DONE; end
+      else begin state_next = state; end
     end
-    default: begin
-      state_next = STATE_IDLE;
+    STATE_DONE: begin
+      if (clk_cnt < CLK_CNT_LIMIT) begin state_next = state; end
+      else begin state_next = STATE_IDLE; end
     end
   endcase
 end
@@ -64,7 +71,7 @@ always_comb begin
   if (state == STATE_IDLE && start_send == 1'b1) begin
     tx_buf_next = tx_byte;
   end
-  else if (state == STATE_TXING && tx_cnt < 8) begin
+  else if (state == STATE_TXING && tx_cnt < 8 && clk_cnt == CLK_CNT_LIMIT) begin
     tx_buf_next = tx_buf >> 1;
   end
   else begin
@@ -75,7 +82,12 @@ end
 /* next logic for tx_cnt */
 always_comb begin
   if (state == STATE_TXING && tx_cnt < 8) begin
-    tx_cnt_next = tx_cnt+1;
+    if (clk_cnt == CLK_CNT_LIMIT) begin
+      tx_cnt_next = tx_cnt+1;
+    end
+    else begin
+      tx_cnt_next = tx_cnt;
+    end
   end
   else begin
     tx_cnt_next = 0;
@@ -83,7 +95,7 @@ always_comb begin
 end
 
 /* update state logic */
-always_ff @(posedge clk_baud or negedge rst) begin
+always_ff @(posedge clk or negedge rst) begin
   if (!rst) begin
     state   <= STATE_IDLE;
     tx_buf  <= 0;

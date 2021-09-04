@@ -19,7 +19,7 @@ end
 uart #(.CLK_PER_BAUD(CLK_PER_BAUD))
 mod_uart (
   /* input */
-  .clk_baud(clk),
+  .clk(clk),
   .rst(rst),
   .tx_byte(bytes),
   .start_send(1'b1),
