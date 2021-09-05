@@ -1,28 +1,40 @@
 module top (
   input clk,
   input rst,
-  output uart_tx,
+  input  rx,
+  output tx,
 );
 
 parameter CLK_FREQ = 25_000_000;
 parameter BAUDRATE = 9600;
 parameter CLK_PER_BAUD = CLK_FREQ / BAUDRATE;
 
-byte bytes = "0";
-logic uart_send = 1'b1; // always start transmit
-logic uart_txed;
+byte rx_byte;
+logic uart_rxed;
 
-uart # (.CLK_PER_BAUD(CLK_PER_BAUD))
-mod_uart (
+uart_tx # (.CLK_PER_BAUD(CLK_PER_BAUD))
+mod_uart_tx (
   /* input */
   .clk(clk),
   .rst(rst),
-  .tx_byte(bytes),
-  .start_send(1'b1),
+  .tx_byte(rx_byte),
+  .start_send(uart_rxed),
 
   /* output */
-  .tx(uart_tx),
-  .done(uart_txed),
+  .tx(tx),
+  .done(uart_txed)
+);
+
+uart_rx # (.CLK_PER_BAUD(CLK_PER_BAUD))
+mod_uart_rx (
+  /* input */
+  .clk(clk),
+  .rst(rst),
+  .rx(rx),
+
+  /* output */
+  .rx_byte(rx_byte),
+  .done(uart_rxed)
 );
 
 endmodule

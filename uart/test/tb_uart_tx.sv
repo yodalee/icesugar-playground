@@ -16,7 +16,7 @@ initial begin
   $dumpvars(0, uart_tx);
 end
 
-uart #(.CLK_PER_BAUD(CLK_PER_BAUD))
+uart_tx #(.CLK_PER_BAUD(CLK_PER_BAUD))
 mod_uart (
   /* input */
   .clk(clk),
