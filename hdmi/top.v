@@ -46,9 +46,9 @@ module ULX3S_25F (
       .i_rd(o_rd), .i_newline(o_newline), .i_newframe(o_newframe),
       .o_pixel(pixel));
 
-  OBUFDS OBUFDS_red(.I(o_red), .O(gpdi_dp[2]), .OB(gpdi_dn[2]));
-  OBUFDS OBUFDS_grn(.I(o_grn), .O(gpdi_dp[1]), .OB(gpdi_dn[1]));
-  OBUFDS OBUFDS_blu(.I(o_blu), .O(gpdi_dp[0]), .OB(gpdi_dn[0]));
-  OBUFDS OBUFDS_clock(.I(clk_25MHz), .O(gpdi_dp[3]), .OB(gpdi_dn[3]));
+  diffio diffio_R(.in(o_red), .op(gpdi_dp[2]), .on(gpdi_dn[2]));
+  diffio diffio_G(.in(o_grn), .op(gpdi_dp[1]), .on(gpdi_dn[1]));
+  diffio diffio_B(.in(o_blu), .op(gpdi_dp[0]), .on(gpdi_dn[0]));
+  diffio diffio_C(.in(clk_25MHz), .op(gpdi_dp[3]), .on(gpdi_dn[3]));
 
 endmodule
