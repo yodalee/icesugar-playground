@@ -1,7 +1,7 @@
 TARGET = top
 TOP = top
 
-SRCS = clock.sv llhdmi.v diffio.sv TMDS_encoder.v top.sv vgatestsrc.v
+SRCS = clock.sv hdmi.sv diffio.sv TMDS_encoder.v top.sv vgatestsrc.v
 
 ALL: $(TARGET).bin
 
