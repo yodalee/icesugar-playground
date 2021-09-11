@@ -53,12 +53,12 @@ module hdmi(
   // Convert the 8-bit colours into 10-bit TMDS values
   logic [9:0] tmds_red, tmds_green, tmds_blue;
   logic [9:0] tmds_red_next, tmds_green_next, tmds_blue_next;
-  TMDS_encoder encode_R(.clk(clk_pixel), .VD(i_red), .CD(2'b00),
-    .VDE(DrawArea), .TMDS(tmds_red_next));
-  TMDS_encoder encode_G(.clk(clk_pixel), .VD(i_green), .CD(2'b00),
-    .VDE(DrawArea), .TMDS(tmds_green_next));
-  TMDS_encoder encode_B(.clk(clk_pixel), .VD(i_blue), .CD({vSync,hSync}),
-    .VDE(DrawArea), .TMDS(tmds_blue_next));
+  TMDS_encoder encode_R(.clk(clk_pixel), .rst(rst), .data(i_red), .control(2'b00),
+    .enable(DrawArea), .tmds(tmds_red_next));
+  TMDS_encoder encode_G(.clk(clk_pixel), .rst(rst), .data(i_green), .control(2'b00),
+    .enable(DrawArea), .tmds(tmds_green_next));
+  TMDS_encoder encode_B(.clk(clk_pixel), .rst(rst), .data(i_blue), .control({vSync,hSync}),
+    .enable(DrawArea), .tmds(tmds_blue_next));
 
   // Strobe the TMDS_shift_load once every 10 i_tmdsclks
   // i.e. at the start of new pixel data
