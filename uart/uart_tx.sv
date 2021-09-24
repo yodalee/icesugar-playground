@@ -24,7 +24,7 @@ logic [3:0] tx_idx, tx_idx_next;
 int  clk_cnt, clk_cnt_next;
 
 /* output logic */
-assign done = tx_idx == TX_LENGTH - 1;
+assign done = (tx_idx == TX_LENGTH - 1 && clk_cnt == CLK_CNT_LIMIT);
 assign tx = (state == STATE_IDLE) ? 1'b1 : tx_buf[tx_idx];
 
 /* next logic for clk_cnt */

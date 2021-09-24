@@ -24,7 +24,7 @@ logic [3:0] rx_idx, rx_idx_next;
 int  clk_cnt, clk_cnt_next;
 
 /* output logic */
-assign done = rx_idx == RX_LENGTH - 1;
+assign done = (rx_idx == RX_LENGTH - 1 && clk_cnt == CLK_CNT_LIMIT);
 assign rx_byte = rx_buf[8:1];
 
 /* next logic for clk_cnt */
