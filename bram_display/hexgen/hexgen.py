@@ -16,14 +16,14 @@ def main():
         for x in range(nim.width):
             pixel = nim.getpixel((x, y))
             print(pixel)
-            convert_pixel = ((pixel[0] >> 5) << 5) | ((pixel[1] >> 5) << 2) | ((pixel[2] >> 6) & 0x3)
+            convert_pixel = ((pixel[0] >> 5) << 6) | ((pixel[1] >> 5) << 3) | ((pixel[2] >> 5) & 0x7)
             out_color.append(convert_pixel)
 
     print(len(out_color))
 
     with open("data.hex", "w") as f:
         for (idx, pixel) in enumerate(out_color):
-            f.write("{0:02x}\n".format(pixel))
+            f.write("{0:09b}\n".format(pixel))
 
     nim.save("result.jpg")
 

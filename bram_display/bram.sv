@@ -13,7 +13,7 @@ parameter DEPTH=8;
 parameter SIZE=(1<<DEPTH);
 
 initial begin
-  $readmemh("data.hex", ram);
+  $readmemb("data.bin", ram);
 end
 
 logic [WIDTH-1:0] ram [0:SIZE-1];
