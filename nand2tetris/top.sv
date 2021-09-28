@@ -1,5 +1,5 @@
-
 `include "clock.sv"
+`include "gpu.sv"
 `include "hdmi/diffio.sv"
 `include "hdmi/hdmi.sv"
 `include "hdmi/TMDS_encoder.sv"
@@ -22,7 +22,6 @@ module top (
 
   logic [7:0] pixelR, pixelG, pixelB;
   logic [23:0] pixel;
-  assign pixel = 24'hFFFFFF;
   assign pixelR = pixel[23:16];
   assign pixelG = pixel[15:8];
   assign pixelB = pixel[7:0];
@@ -40,6 +39,15 @@ module top (
   diffio diffio_green (.in(o_green),   .op(hdmi_dp[1]), .on(hdmi_dn[1]));
   diffio diffio_blue  (.in(o_blue),    .op(hdmi_dp[0]), .on(hdmi_dn[0]));
   diffio diffio_clock (.in(clk_25MHz), .op(hdmi_dp[3]), .on(hdmi_dn[3]));
+
+  gpu gpu_i (
+    .clk(clk),
+    .rst(rst),
+    .i_newframe(o_newframe),
+    .i_newline(o_newline),
+    .i_enable(o_enable),
+    .pixel(pixel)
+  );
 
 endmodule
 
