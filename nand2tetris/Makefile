@@ -2,7 +2,7 @@ TARGET = top
 TOP = top
 
 SRCS = top.sv \
-	alu.sv clock.sv \
+	alu.sv clock.sv pc.sv \
 	hdmi/diffio.sv hdmi/hdmi.sv hdmi/TMDS_encoder.sv
 
 ALL: $(TARGET).bin
