@@ -20,6 +20,7 @@ logic [WIDTH - 1:0] iny;
 logic [WIDTH - 1:0] addr_instruction;
 logic [WIDTH - 1:0] a_out;
 logic [WIDTH - 1:0] alu_out;
+logic [WIDTH - 1:0] next_pc;
 logic f_zero;
 logic f_negative;
 logic jump;
@@ -55,7 +56,7 @@ hack_pc #(
 ) pc (
   .clk(clk), .rst(rst),
   .inc(1'b1), .load(jump),
-  .in(a_out), .out(o_pc)
+  .in(a_out + 1), .out(next_pc)
 );
 
 register register_d (
@@ -89,5 +90,6 @@ hack_alu alu (
 assign o_out = alu_out;
 assign o_addr = a_out;
 assign o_we = !is_A_inst && instruction[3];
+assign o_pc = jump ? a_out : next_pc;
 
 endmodule
