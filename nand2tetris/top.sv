@@ -1,6 +1,7 @@
 `include "clock.sv"
 `include "cpu.sv"
 `include "gpu.sv"
+`include "ram.sv"
 `include "rom.sv"
 `include "hdmi/diffio.sv"
 `include "hdmi/hdmi.sv"
@@ -65,13 +66,22 @@ module top (
     .o_addr(addr), .o_pc(rom_addr)
   );
 
+  ram ram_i (
+    .clk(clk),
+    .we(mem_we),
+    .addr(addr), .data_rd(mem_out), .data_wr(cpu_out),
+    .gpu_addr(gpu_addr), .gpu_data(gpu_data)
+  );
+
   gpu gpu_i (
     .clk(clk),
     .rst(rst),
     .i_newframe(o_newframe),
     .i_newline(o_newline),
     .i_enable(o_enable),
-    .pixel(pixel)
+    .o_addr(gpu_addr),
+    .i_data(gpu_data),
+    .o_pixel(pixel)
   );
 
   assign debug = rom_addr[7:0];

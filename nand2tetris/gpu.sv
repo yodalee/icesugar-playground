@@ -4,12 +4,13 @@ module gpu (
   input i_newframe,
   input i_newline,
   input i_enable,
-  output logic [23:0] pixel
+  output logic [15:0] o_addr,
+  input [15:0] i_data,
+  output logic [23:0] o_pixel
 );
 
 localparam WIDTH  = 640;
 localparam HEIGHT = 480;
-localparam BASE   = 16 * 1024; // GPU memory offset 16K, 16
 
 shortint counterX, counterY;
 
@@ -30,12 +31,14 @@ always_ff @(posedge clk or negedge rst) begin
   end
 end
 
+assign o_addr = (counterY << 5) + (counterX >> 4);
+
 always_comb begin
   if (counterX >= 512 || counterY >= 256) begin
-    pixel = 24'd0;
+    o_pixel = 24'd0;
   end
   else begin
-    pixel = 24'hffffff;
+    o_pixel = (i_data[counterX & 4'hf]) ? 24'hffffff : 0;
   end
 end
 
