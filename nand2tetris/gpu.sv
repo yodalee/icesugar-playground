@@ -13,6 +13,7 @@ localparam WIDTH  = 640;
 localparam HEIGHT = 480;
 
 shortint counterX, counterY;
+logic [3:0] index;
 
 always_ff @(posedge clk or negedge rst) begin
   if (!rst) begin
@@ -32,13 +33,14 @@ always_ff @(posedge clk or negedge rst) begin
 end
 
 assign o_addr = (counterY << 5) + (counterX >> 4);
+assign index = counterX[3:0] - 1;
 
 always_comb begin
   if (counterX >= 512 || counterY >= 256) begin
     o_pixel = 24'd0;
   end
   else begin
-    o_pixel = (i_data[counterX & 4'hf]) ? 24'hffffff : 0;
+    o_pixel = (i_data[index]) ? 24'hffffff : 0;
   end
 end
 
